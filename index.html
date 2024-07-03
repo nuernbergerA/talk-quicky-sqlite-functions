@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Talk: SQLite functions | Adrian Nürnberger</title>
+
+		<link rel="stylesheet" href="dist/reset.css">
+		<link rel="stylesheet" href="dist/reveal.css">
+		<link rel="stylesheet" href="dist/theme/black.css">
+
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="plugin/highlight/material-palenight.css">
+	</head>
+	<body>
+		<style>
+			:root {
+				--r-code-font: 'Operator Mono Lig Medium','Operator Mono SSm Lig Medium', monospace !important;
+				--display-footer: none;
+			}
+			code {
+				overflow: hidden !important;
+			}
+			code tr:not(.highlight-line) .hljs-ln-code {
+				filter:blur(1.5px);
+			}
+			footer {
+				width: 100dvw;
+				height: 50px;
+				position: fixed;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				display: var(--display-footer);
+				padding: 1rem;
+				align-items: center;
+				gap: 1rem;
+				color:#fff;
+				font-family: var(--r-main-font);
+				z-index: 999999;
+			}
+			pre.inline, pre.inline code  {
+				display: inline !important;
+			}
+			.fragment.vanish.current-fragment, .fragment.vanish.visible:not(.current-fragment) {
+				visibility: hidden;
+				opacity: 0;
+				height: 0;
+			}
+			.animate-drink {
+				animation: drink 4s infinite linear;
+				display: block;
+			}
+			@keyframes drink {
+				0%,100% {
+					transform: rotate(0deg) translate(0px, 20px);
+				}
+				25% {
+					transform: rotate(10deg) translate(0px, -10px);
+				}
+				50% {
+					transform: rotate(57deg) translate(-11px, -10px);
+				}
+			}
+			.two-col {
+				position: absolute;
+				width: 80vw;
+				left: -20%;
+				display: flex;
+				gap: 2rem;
+			}
+		</style>
+		<div class="reveal">
+			<div class="slides">
+				<section data-auto-animate data-background="repeat 10px/40px url(assets/pattern.svg), no-repeat top/cover url(assets/bg-head.webp)">
+					<h1 class="r-fit-text fragment" data-fragment-index="1">Hello, I am Adrian!</h1>
+					<div style="max-width: 60%; margin: 0 auto;">
+						<h1 class="r-fit-text">
+							<span class="fragment" data-fragment-index="2">TALL-Stack Developer</span><br>
+						</h1>
+						<p class="fragment" data-fragment-index="3">from 🇦🇹 Vienna</p>
+						<div style="display: inline-flex;">
+							<span class="fragment" data-fragment-index=4">I ❤️ writing&nbsp;</span>
+							<span class="r-stack">
+								<span class="fragment fade-in" data-fragment-index="4">
+									<span class="fragment highlight-red" data-fragment-index="5">
+									  <span class="fragment custom vanish" data-fragment-index="6">Tests</span>
+									</span>
+								</span>
+								<span class="fragment fade-down" data-fragment-index="6">Pest</span>
+							</span>
+						</div>
+					</div>
+				</section>
+				<!-- END INTRO -->
+				<!-- START PEST -->
+				<section>
+					<section data-auto-animate data-background="repeat 10px/40px url(assets/pattern.svg)">
+						<h3>Today's topic</h3>
+						<ul>
+							<li class="fragment">Testing</li>
+							<li class="fragment">Testing</li>
+							<li class="fragment">Testing</li>
+							<li class="fragment">and a bit DB</li>
+						</ul>
+					</section>
+					<section data-auto-animate data-background="repeat 10px/40px url(assets/pattern.svg)">
+						<h3>📊 Hands up 🙋‍♂️ 🙋‍♀️</h3>
+						<br>
+						<br>
+						<div class="r-stack">
+							<h4 class="fragment fade-in-then-out">📝 Tests</h4>
+							<h4 class="fragment fade-in-then-out">🛢️ Testing with same DB <br>as in production</h4>
+							<p class="fragment fade-in-then-out">💻 Rewritten SQL/eloquent to test with SQLite</p>
+						</div>
+					</section>
+					<section data-auto-animate data-background="repeat 10px/40px url(assets/pattern.svg)">
+						<h3>Code Example</h3>
+						<pre data-id="code-example"><code class="language-php">Invoices::query()
+	->where('paid', true)
+	->get()
+	->groupBy(fn(Invoice $invoice) => $invoice->paid_at->year)
+	->map(function ($group) {
+		return [
+			'year' => $group->first()->paid_at->year,
+			'total_amount' => $group->sum('amount'),
+		];
+	});
+						</code></pre>
+					</section>
+					<section data-auto-animate data-background="repeat 10px/40px url(assets/pattern.svg)">
+						<h3>Code Example</h3>
+						<pre data-id="code-example"><code class="language-php">Invoices::query()
+	->where('paid', true)
+	->get() //loading all models in memory
+	->groupBy(fn(Invoice $invoice) => $invoice->paid_at->year)
+	->map(function ($group) { // no autocomplete
+		return [
+			'year' => $group->first()->paid_at->year,
+			'total_amount' => $group->sum('amount'),
+		];
+	});
+						</code></pre>
+					</section>
+					<section data-auto-animate data-background="repeat 10px/40px url(assets/pattern.svg)">
+						<h3>Lets test</h3>
+						<div class="r-stack">
+						<pre data-id="code-example"><code class="language-php">
+it('lists total for paid invoices per year', function () {
+	Invoice::factory()->times(10)->create();
+
+	// calling our code example
+
+	expect($result)->toMatch([
+		2020 => 1_203_654,
+		2021 => 12_310,
+	]);
+});
+						</code></pre>
+						<div class="fragment fade-in">
+							<img src="assets/sqlite-logo.png" width="380" style="background-color: #fff" />
+						</div>
+						</div>
+					</section>
+
+
+					<section data-auto-animate data-background="repeat 10px/40px url(assets/pattern.svg)">
+						<img src="assets/sqlite-logo.png" width="380" style="background-color: #fff" />
+						<div class="fragment fade-in">
+							🗨️ i dont know what year() means 🤷
+						</div>
+					</section>
+
+					<section data-auto-animate data-background="repeat 10px/40px url(assets/pattern.svg)">
+						<h3>🦸 PDO to the rescue</h3>
+						<pre data-id="code-sqlite-function"><code class="language-php" data-line-numbers="1-12|1-2|2-6|4-8|10-12|11|1-12">/** @var \Illuminate\Database\Connection $connection */
+$connection = DB::connection();
+
+if ($connection->getConfig('driver') !== 'sqlite') {
+	return;
+}
+
+$dbHandle = $connection->getPdo();
+
+$dbHandle->sqliteCreateFunction('year', fn($value) =>
+	Carbon::parse($value)->year
+);
+						</code></pre>
+					</section>
+				</section>
+				<!-- END SECRET SAUCE -->
+				<section data-auto-animate data-background="repeat 10px/40px url(assets/pattern.svg), no-repeat center 350%/contain url(assets/bg-foot.webp)">
+					<h3>Thanks</h3>
+					<div class="fragment r-stack" style="position: relative;" data-fragment-index="1">
+						<img class="r-stretch" src="assets/head.png"/>
+						<div style="position: absolute; inset: 0; left: -10%; top: 74%;"><span class="animate-drink">🍺</span></div>
+					</div>
+				</section>
+			</div>
+		</div>
+		<footer>
+			<div style="font-size: 1.8rem;padding-top: 0.4rem;margin-left: -0.5rem; display: inline-flex; align-items: center; gap: 1rem;">
+				<span>🛢️🪶SQLite functions</span>
+				<span>|</span>
+				<span>💬 Adrian Nürnberger</span>
+				<span>|</span>
+				<img src="assets/x-logo.svg" height="25px" />
+				<span>@nuernberger_me</span>
+			</div>
+		</footer>
+
+		<script src="dist/qrcode.min.js"></script>
+		<script>
+			document.querySelectorAll('[data-qr]').forEach((el) => {
+				el.replaceWith(new QRCode({
+					msg: el.dataset.qr,
+					pal : ["#000000", "#f2f4f8"]
+				}))
+			});
+		</script>
+		<script src="dist/reveal.js"></script>
+		<script src="plugin/highlight/highlight.js"></script>
+		<script src="plugin/highlight/blade.min.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				hash: true,
+				progress: false,
+				// width: 1920,
+				// height: 1080,
+				highlight: {
+					beforeHighlight: hljs => hljs.registerLanguage('blade', bladeLanguage)
+				},
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [RevealHighlight]
+			});
+
+			Reveal.on( 'slidechanged', event => {
+				const root = document.querySelector(':root');
+				if (event.indexh >= 3) {
+					root.style.setProperty('--display-footer', 'flex')
+				} else {
+					root.style.setProperty('--display-footer', 'none')
+				}
+			});
+		</script>
+	</body>
+</html>
