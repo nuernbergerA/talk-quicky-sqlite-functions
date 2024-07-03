@@ -144,6 +144,15 @@
 						</code></pre>
 					</section>
 					<section data-auto-animate data-background="repeat 10px/40px url(assets/pattern.svg)">
+						<h3>Code Example</h3>
+						<pre data-id="code-example"><code class="language-php">Invoices::query()
+	->where('paid', true)
+	->groupBy(DB::raw('year(paid_at)'))
+	->selectRaw('year(paid_at) as aggregate, sum(amount) as value')
+	->pluck('value', 'aggregate');
+						</code></pre>
+					</section>
+					<section data-auto-animate data-background="repeat 10px/40px url(assets/pattern.svg)">
 						<h3>Lets test</h3>
 						<div class="r-stack">
 						<pre data-id="code-example"><code class="language-php">
